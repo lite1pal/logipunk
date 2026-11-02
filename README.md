@@ -1,6 +1,6 @@
 # Logipunk
 
-A tool to analyze log files and report useful analytics.
+A tool to process log files and report useful analytics.
 
 For example:
 
@@ -8,7 +8,21 @@ For example:
 2. How many error logs
 3. Repeated IP addresses with failed requests
 
-## Example usage
+## Installation
+
+Install the binary directly:
+
+```
+go install github.com/lite1pal/logipunk@latest
+```
+
+## Usage
+
+```
+logipunk <path>
+```
+
+## Examples
 
 ```bash
 2026-10-30T08:12:01Z INFO  192.168.1.10 GET /api/products 200 32ms
@@ -23,7 +37,7 @@ For example:
 You run:
 
 ```
-  logipunk app.log
+  logipunk example.log
 ```
 
 Output:
@@ -55,12 +69,4 @@ TOP ENDPOINTS
 /api/login          1
 /api/users          1
 /api/orders         1
-
-SLOWEST REQUESTS
-----------------
-GET /api/orders     300ms
-POST /api/checkout  145ms
-POST /api/checkout  120ms
-
-UNIQUE IP ADDRESSES: 4
 ```

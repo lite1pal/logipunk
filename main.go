@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/lite1pal/logipunk/parser"
 	"log"
 	"net/http"
 	"os"
@@ -11,24 +12,6 @@ import (
 	"strings"
 	"time"
 )
-
-type Level string
-
-const (
-	INFO  = "INFO"
-	ERROR = "ERROR"
-	WARN  = "WARN"
-)
-
-type LogRow struct {
-	CreatedAt  time.Time
-	Level      Level
-	IP         string
-	Method     string
-	Endpoint   string
-	StatusCode int
-	Duration   time.Duration
-}
 
 func main() {
 	log.Print("Starting Logipunk...")
@@ -52,7 +35,7 @@ func main() {
 
 	logRows := parseLogs(contents)
 
-	levelCounts := make(map[Level]int)
+	levelCounts := make(map[parser.Level]int)
 
 	for _, logRow := range logRows {
 		levelCounts[logRow.Level]++
@@ -70,9 +53,9 @@ func main() {
 	displayTopEndpoints(logRows)
 }
 
-func parseLogs(contents []byte) []LogRow {
+func parseLogs(contents []byte) []parser.LogRow {
 	rows := strings.Split(string(contents), "\n")
-	var logRows []LogRow
+	var logRows []parser.LogRow
 	for _, row := range rows {
 		if row == "" {
 			continue
@@ -88,14 +71,14 @@ func parseLogs(contents []byte) []LogRow {
 		}
 
 		// extract level field
-		var level Level
+		var level parser.Level
 		switch fields[1] {
 		case "INFO":
-			level = INFO
+			level = parser.INFO
 		case "ERROR":
-			level = ERROR
+			level = parser.ERROR
 		case "WARN":
-			level = WARN
+			level = parser.WARN
 		default:
 			log.Fatalf("invalid level field: %s: row: %s", level, row)
 		}
@@ -126,7 +109,7 @@ func parseLogs(contents []byte) []LogRow {
 			log.Fatalf("parse duration field: row: %s: %v", row, err)
 		}
 
-		logRows = append(logRows, LogRow{
+		logRows = append(logRows, parser.LogRow{
 			CreatedAt:  createdAt,
 			Level:      level,
 			IP:         ip,
@@ -140,7 +123,7 @@ func parseLogs(contents []byte) []LogRow {
 	return logRows
 }
 
-func displayLevels(logRows []LogRow) {
+func displayLevels(logRows []parser.LogRow) {
 	levelCounts := calculateLevels(logRows)
 
 	if len(levelCounts) == 0 {
@@ -155,8 +138,8 @@ func displayLevels(logRows []LogRow) {
 	}
 }
 
-func calculateLevels(logRows []LogRow) map[Level]int {
-	levelCounts := make(map[Level]int)
+func calculateLevels(logRows []parser.LogRow) map[parser.Level]int {
+	levelCounts := make(map[parser.Level]int)
 
 	for _, logRow := range logRows {
 		levelCounts[logRow.Level]++
@@ -165,7 +148,7 @@ func calculateLevels(logRows []LogRow) map[Level]int {
 	return levelCounts
 }
 
-func displayHttpStatuses(logRows []LogRow) {
+func displayHttpStatuses(logRows []parser.LogRow) {
 	httpStatusCounts := calculateHttpStatuses(logRows)
 
 	fmt.Println("HTTP STATUS")
@@ -176,7 +159,7 @@ func displayHttpStatuses(logRows []LogRow) {
 	}
 }
 
-func calculateHttpStatuses(logRows []LogRow) map[int]int {
+func calculateHttpStatuses(logRows []parser.LogRow) map[int]int {
 	httpStatusCounts := make(map[int]int)
 
 	for _, logRow := range logRows {
@@ -186,7 +169,7 @@ func calculateHttpStatuses(logRows []LogRow) map[int]int {
 	return httpStatusCounts
 }
 
-func displayTopEndpoints(logRows []LogRow) {
+func displayTopEndpoints(logRows []parser.LogRow) {
 	topEndpointCounts := calculateTopEndpoints(logRows)
 
 	if len(topEndpointCounts) == 0 {
@@ -201,7 +184,7 @@ func displayTopEndpoints(logRows []LogRow) {
 	}
 }
 
-func calculateTopEndpoints(logRows []LogRow) map[string]int {
+func calculateTopEndpoints(logRows []parser.LogRow) map[string]int {
 	topEndpointCounts := make(map[string]int)
 
 	for _, logRow := range logRows {
